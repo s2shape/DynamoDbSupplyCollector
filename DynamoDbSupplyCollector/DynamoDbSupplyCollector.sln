@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoDbSupplyCollector", "DynamoDbSupplyCollector\DynamoDbSupplyCollector.csproj", "{9D6AAB91-AB43-40F5-83C8-29E5E11B0171}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamoDbSupplyCollector", "DynamoDbSupplyCollector\DynamoDbSupplyCollector.csproj", "{9D6AAB91-AB43-40F5-83C8-29E5E11B0171}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoDbSupplyCollector.Tests", "DynamoDbSupplyCollector.Tests\DynamoDbSupplyCollector.Tests.csproj", "{CCB94733-549A-4E7A-AFAF-4C62D6EFCB8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamoDbSupplyCollector.Tests", "DynamoDbSupplyCollector.Tests\DynamoDbSupplyCollector.Tests.csproj", "{CCB94733-549A-4E7A-AFAF-4C62D6EFCB8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamoDbDataLoader", "DynamoDbDataLoader\DynamoDbDataLoader.csproj", "{13F57405-986A-434D-B9BE-F71D914BA8C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{CCB94733-549A-4E7A-AFAF-4C62D6EFCB8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CCB94733-549A-4E7A-AFAF-4C62D6EFCB8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CCB94733-549A-4E7A-AFAF-4C62D6EFCB8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13F57405-986A-434D-B9BE-F71D914BA8C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13F57405-986A-434D-B9BE-F71D914BA8C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13F57405-986A-434D-B9BE-F71D914BA8C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13F57405-986A-434D-B9BE-F71D914BA8C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

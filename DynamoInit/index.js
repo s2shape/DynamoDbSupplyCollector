@@ -48,6 +48,20 @@ var tables = [
             ReadCapacityUnits: 10,
             WriteCapacityUnits: 10
         }
+    },
+	
+	{
+        TableName: "PEOPLE",
+        KeySchema: [
+            { AttributeName: "Id", KeyType: "HASH" }
+        ],
+        AttributeDefinitions: [
+            { AttributeName: "Id", AttributeType: "S" }
+        ],
+        ProvisionedThroughput: {
+            ReadCapacityUnits: 10,
+            WriteCapacityUnits: 10
+        }
     }
 ];
 
