@@ -1,5 +1,6 @@
 using FluentAssertions;
 using S2.BlackSwan.SupplyCollector.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -44,18 +45,107 @@ namespace DynamoDbSupplyCollector.Tests
         }
 
         [Fact]
-        public void CollectSample()
+        public void CollectSample_handles_strings_properly()
         {
             // arrange
             var dataCollection = new DataCollection(_container, "PEOPLE");
-            var firstNameEntity = new DataEntity("FirstName", DataType.String, "string", _container, dataCollection);
+            var dataEntity = new DataEntity("FirstName", DataType.String, "string", _container, dataCollection);
             const int SampleSize = 10;
 
-            var sample = _sut.CollectSample(firstNameEntity, SampleSize);
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
 
             // assert
             sample.Should().HaveCount(SampleSize);
-            
+            sample.Should().OnlyContain(x => !string.IsNullOrEmpty(x));
+        }
+
+        [Fact]
+        public void CollectSample_handles_numbers_properly()
+        {
+            // arrange
+            var dataCollection = new DataCollection(_container, "PEOPLE");
+            var dataEntity = new DataEntity("Age", DataType.Int, "Integer", _container, dataCollection);
+            const int SampleSize = 10;
+
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
+
+            // assert
+            sample.Should().HaveCount(SampleSize);
+            sample.Should().OnlyContain(s => IsInt(s));
+        }
+
+        [Fact]
+        public void CollectSample_handles_dates_properly()
+        {
+            // arrange
+            var dataCollection = new DataCollection(_container, "PEOPLE");
+            var dataEntity = new DataEntity("DOB", DataType.DateTime, "Date", _container, dataCollection);
+            const int SampleSize = 10;
+
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
+
+            // assert
+            sample.Should().HaveCount(SampleSize);
+            sample.Should().OnlyContain(s => IsDate(s));
+        }
+
+        [Fact]
+        public void CollectSample_handles_booleans_properly()
+        {
+            // arrange
+            var dataCollection = new DataCollection(_container, "PEOPLE");
+            var dataEntity = new DataEntity("IsDeleted", DataType.Boolean, "Boolean", _container, dataCollection);
+            const int SampleSize = 202;
+
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
+
+            // assert
+            sample.Should().HaveCount(SampleSize);
+            sample.Should().OnlyContain(s => IsBoolean(s));
+        }
+
+        [Fact]
+        public void CollectSample_handles_nulls_properly()
+        {
+            // arrange
+            var dataCollection = new DataCollection(_container, "PEOPLE");
+            var dataEntity = new DataEntity("AlwaysNull", DataType.Unknown, "NULL", _container, dataCollection);
+            const int SampleSize = 202;
+
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
+
+            // assert
+            sample.Should().HaveCount(SampleSize);
+            sample.Should().OnlyContain(s => string.IsNullOrEmpty(s));
+        }
+
+        [Fact]
+        public void CollectSample_skips_complex_objects()
+        {
+            // arrange
+            var dataCollection = new DataCollection(_container, "PEOPLE");
+            var dataEntity = new DataEntity("PhoneNumbers", DataType.Unknown, "List", _container, dataCollection);
+            const int SampleSize = 202;
+
+            var sample = _sut.CollectSample(dataEntity, SampleSize);
+
+            // assert
+            sample.Should().HaveCount(0);
+        }
+
+        private bool IsInt(string val)
+        {
+            return int.TryParse(val, out var _);
+        }
+
+        private bool IsDate(string val)
+        {
+            return DateTime.TryParse(val, out var _);
+        }
+
+        private bool IsBoolean(string val)
+        {
+            return val == "1" || val == "0";
         }
     }
 }

@@ -1,15 +1,13 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.Model;
 using DynamoDbDataLoader.Models;
 using System;
-using System.Threading.Tasks;
 
 namespace DynamoDbDataLoader
 {
     class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             try
             {
@@ -27,7 +25,7 @@ namespace DynamoDbDataLoader
                 // bulk insert
                 var contactsBatch = context.CreateBatchWrite<Person>();
                 contactsBatch.AddPutItems(people);
-                await contactsBatch.ExecuteAsync();
+                contactsBatch.ExecuteAsync().GetAwaiter().GetResult();
 
                 Console.WriteLine("The data has been loaded!");
             }

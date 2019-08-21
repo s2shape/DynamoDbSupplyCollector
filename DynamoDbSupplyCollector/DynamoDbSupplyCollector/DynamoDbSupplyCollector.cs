@@ -19,6 +19,10 @@ namespace DynamoDbSupplyCollector
 
             var context = GetContext(dataEntity.Container.ConnectionString);
 
+            // what if you need a specific attribute that not every document has?
+            // should we skip those docs?
+            // should we skip null values?
+            // what if one doc has Addresses as a simple value but another one as a complex object?
             var request = new ScanRequest
             {
                 AttributesToGet = new List<string> { dataEntity.Name },
@@ -29,10 +33,53 @@ namespace DynamoDbSupplyCollector
             var result = client.ScanAsync(request).GetAwaiter().GetResult();
 
             var samples = result.Items
-                .Select(x => JsonConvert.SerializeObject(x.Values))
+                .Where(FilterSimpleValues)
+                .Select(x => GetValue(x))
                 .ToList();
 
             return samples;
+        }
+
+        private static string GetValue(Dictionary<string, AttributeValue> attr)
+        {
+            // DynamoDB attribute types https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_AttributeValue.html
+            // this is no any values when the actual value is undefined (null in .net terms)
+            if (!HasValue(attr))
+                return null;
+
+            var val = attr.Values.First();
+
+            if (!string.IsNullOrWhiteSpace(val.S))
+                return val.S;
+
+            if (!string.IsNullOrWhiteSpace(val.N))
+                return val.N;
+
+            if (val.NULL)
+                return null;
+
+            throw new NotSupportedException("CollectSample doesn't support complex values such as arrays, nested objects etc.");
+        }
+
+        private static bool FilterSimpleValues(Dictionary<string, AttributeValue> attr)
+        {
+            // this is no any values when the actual value is undefined (null in .net terms)
+            if (!HasValue(attr))
+                return true;
+
+            var val = attr.Values.First();
+
+            if (!string.IsNullOrWhiteSpace(val.S) ||
+                !string.IsNullOrWhiteSpace(val.N) ||
+                val.NULL)
+                return true;
+
+            return false;
+        }
+
+        private static bool HasValue(Dictionary<string, AttributeValue> attr)
+        {
+            return attr.Values.Any();
         }
 
         public override List<string> DataStoreTypes()

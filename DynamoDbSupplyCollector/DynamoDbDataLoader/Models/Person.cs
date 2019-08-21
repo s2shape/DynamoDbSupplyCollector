@@ -12,6 +12,12 @@ namespace DynamoDbDataLoader.Models
 
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        public bool IsDeleted { get; set; }
+        public int Age { get; set; }
+        public DateTime DOB { get; set; }
+
+        public string AlwaysNull { get; set; } = null;
+
         public Dictionary<string, Address> Addresses { get; set; }
         public List<Phone> PhoneNumbers { get; set; }
 
@@ -26,6 +32,8 @@ namespace DynamoDbDataLoader.Models
             Id = Guid.NewGuid();
             FirstName = "First" + suffix;
             LastName = "Last" + suffix;
+            DOB = DateTime.Now;
+            Age = new Random().Next(18, 100);
             for (int i = 0; i < AddressCount; i++)
             {
                 var address = new Address(i);
