@@ -1,10 +1,12 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
+using Newtonsoft.Json;
 using S2.BlackSwan.SupplyCollector;
 using S2.BlackSwan.SupplyCollector.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace DynamoDbSupplyCollector
@@ -13,7 +15,24 @@ namespace DynamoDbSupplyCollector
     {
         public override List<string> CollectSample(DataEntity dataEntity, int sampleSize)
         {
-            throw new NotImplementedException();
+            var client = GetClient(dataEntity.Container.ConnectionString);
+
+            var context = GetContext(dataEntity.Container.ConnectionString);
+
+            var request = new ScanRequest
+            {
+                AttributesToGet = new List<string> { dataEntity.Name },
+                TableName = dataEntity.Collection.Name,
+                Limit = sampleSize
+            };
+
+            var result = client.ScanAsync(request).GetAwaiter().GetResult();
+
+            var samples = result.Items
+                .Select(x => JsonConvert.SerializeObject(x.Values))
+                .ToList();
+
+            return samples;
         }
 
         public override List<string> DataStoreTypes()
@@ -75,6 +94,7 @@ namespace DynamoDbSupplyCollector
 
         private AmazonDynamoDBClient GetClient(string connectionString)
         {
+            //TODO: re-factor handling of the connection string
             var sections = connectionString.Split(';');
 
             var serviceUrlSection = sections[0];
@@ -97,12 +117,12 @@ namespace DynamoDbSupplyCollector
             return context;
         }
 
-        string Value(string pair)
+        private string Value(string pair)
         {
             return pair.Split("=")[1];
         }
 
-        async Task<List<string>> GetTables(AmazonDynamoDBClient client)
+        private async Task<List<string>> GetTables(AmazonDynamoDBClient client)
         {
             var tableNames = new List<string>();
             string lastTableNameEvaluated = null;
