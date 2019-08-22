@@ -141,7 +141,7 @@ namespace DynamoDbSupplyCollector.Tests
         {
             var (dataCollections, dataEntities) = _sut.GetSchema(_container);
 
-            dataCollections.Should().NotBeEmpty();
+            dataCollections.Should().HaveCount(4);
             dataEntities.Should().NotBeEmpty();
         }
 

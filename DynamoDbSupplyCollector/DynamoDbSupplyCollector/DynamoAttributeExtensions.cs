@@ -51,7 +51,7 @@ namespace DynamoDbSupplyCollector
                                     { "", item }
                                 }, newEntityName);
                             }
-                        }
+                        }                       
                     }
                     else
                     {
@@ -86,21 +86,29 @@ namespace DynamoDbSupplyCollector
 
         public static (string, DataType) GetMeta(this Dictionary<string, AttributeValue> src)
         {
-            // DynamoDB attribute types https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_AttributeValue.html
-            // this is no any values when the actual value is undefined (null in .net terms)
+            // DynamoDB attribute types https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
             if (!src.HasValue())
-                return (null, DataType.Unknown);
+                return ("undefined", DataType.Unknown);
 
             var val = src.Values.First();
 
             if (!string.IsNullOrWhiteSpace(val.S))
-                return (val.S, DataType.String);
+                return ("S", DataType.String);
 
             if (!string.IsNullOrWhiteSpace(val.N))
-                return (val.N, DataType.Decimal);
+                return ("N", DataType.Decimal);
+
+            if (val.IsBOOLSet)
+                return ("BOOL", DataType.Boolean);
+
+            if (val.NS?.Any() ?? false)
+                return ("NS", DataType.Unknown);
+
+            if (val.SS?.Any() ?? false)
+                return ("SS", DataType.Unknown);
 
             if (val.NULL)
-                return (null, DataType.Unknown);
+                return ("NULL", DataType.Unknown);
 
             throw new NotSupportedException("CollectSample doesn't support complex values such as arrays, nested objects etc.");
         }
@@ -139,6 +147,9 @@ namespace DynamoDbSupplyCollector
 
             if (!string.IsNullOrWhiteSpace(val.S) ||
                 !string.IsNullOrWhiteSpace(val.N) ||
+                val.NS.Any() ||
+                val.SS.Any() ||
+                val.IsBOOLSet ||
                 val.NULL)
                 return true;
 

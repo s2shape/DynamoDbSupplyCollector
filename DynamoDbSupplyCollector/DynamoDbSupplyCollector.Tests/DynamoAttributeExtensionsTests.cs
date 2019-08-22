@@ -61,17 +61,17 @@ namespace DynamoDbSupplyCollector.Tests
 
             var expected = new List<DataEntity>()
             {
-                new DataEntity("Addresses.type1.Zip", DataType.String, "Zip1", container, collection),
-                new DataEntity("Addresses.type1.Street2", DataType.String, "Street21", container, collection),
-                new DataEntity("Addresses.type1.Street1", DataType.String, "Street11", container, collection),
-                new DataEntity("Addresses.type1.City", DataType.String, "City1", container, collection),
-                new DataEntity("Addresses.type1.State", DataType.String, "State1", container, collection),
+                new DataEntity("Addresses.type1.Zip", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type1.Street2", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type1.Street1", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type1.City", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type1.State", DataType.String, "S", container, collection),
 
-                new DataEntity("Addresses.type0.Zip", DataType.String, "Zip0", container, collection),
-                new DataEntity("Addresses.type0.Street2", DataType.String, "Street20", container, collection),
-                new DataEntity("Addresses.type0.Street1", DataType.String, "Street10", container, collection),
-                new DataEntity("Addresses.type0.City", DataType.String, "City0", container, collection),
-                new DataEntity("Addresses.type0.State", DataType.String, "State0", container, collection)
+                new DataEntity("Addresses.type0.Zip", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type0.Street2", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type0.Street1", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type0.City", DataType.String, "S", container, collection),
+                new DataEntity("Addresses.type0.State", DataType.String, "S", container, collection)
             };
 
             schema.Should().BeEquivalentTo(expected);
@@ -122,9 +122,51 @@ namespace DynamoDbSupplyCollector.Tests
 
             var expected = new List<DataEntity>()
             {
-                new DataEntity("PhoneNumbers.CountryCode", DataType.String, "CountryCode0", container, collection),
-                new DataEntity("PhoneNumbers.Number", DataType.String, "Number0", container, collection),
-                new DataEntity("PhoneNumbers.Type", DataType.String, "Type0", container, collection)              
+                new DataEntity("PhoneNumbers.CountryCode", DataType.String, "S", container, collection),
+                new DataEntity("PhoneNumbers.Number", DataType.String, "S", container, collection),
+                new DataEntity("PhoneNumbers.Type", DataType.String, "S", container, collection)
+            };
+
+            schema.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void GetSchema_handles_simple_lists()
+        {
+            // arrange
+            var container = new DataContainer();
+            var collection = new DataCollection(container, "Any");
+
+            var sut = new Dictionary<string, AttributeValue>
+            {
+                {
+                    "SimpleStrings", new AttributeValue
+                    {
+                        SS = new List<string>{ "val1", "val2" },
+                    }
+                },
+                {
+                    "SimpleInts", new AttributeValue
+                    {
+                        NS = new List<string>{ "1", "-2" },
+                    }
+                },
+                {                    
+                    "BooleanValue", new AttributeValue
+                    {
+                        IsBOOLSet = true,
+                        BOOL = true,
+                    }
+                }
+            };
+
+            var schema = sut.GetSchema(container, collection);
+
+            var expected = new List<DataEntity>()
+            {
+                new DataEntity("SimpleStrings", DataType.Unknown, "SS", container, collection),
+                new DataEntity("SimpleInts", DataType.Unknown, "NS", container, collection),
+                new DataEntity("BooleanValue", DataType.Boolean, "BOOL", container, collection)
             };
 
             schema.Should().BeEquivalentTo(expected);
