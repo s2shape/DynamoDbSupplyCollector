@@ -1,4 +1,7 @@
-﻿using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2.DocumentModel;
+using Amazon.DynamoDBv2.Model;
+using Newtonsoft.Json.Linq;
+using S2.BlackSwan.SupplyCollector.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,19 +10,32 @@ namespace DynamoDbSupplyCollector
 {
     internal static class DynamoAttributeExtensions
     {
-        public static bool HasValue(this Dictionary<string, AttributeValue> attr)
+        public static List<DataEntity> GetSchema(this Dictionary<string, AttributeValue> src)
         {
-            return attr.Values.Any();
+            //var json = JsonConvert.SerializeObject(src);
+
+            var json2 = Document.FromAttributeMap(src).ToJson();
+
+            var jObj = JObject.Parse(json2);
+
+
+
+            throw new NotImplementedException();
         }
 
-        public static string GetValue(this Dictionary<string, AttributeValue> attr)
+        public static bool HasValue(this Dictionary<string, AttributeValue> src)
+        {
+            return src.Values.Any();
+        }
+
+        public static string GetValue(this Dictionary<string, AttributeValue> src)
         {
             // DynamoDB attribute types https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_AttributeValue.html
             // this is no any values when the actual value is undefined (null in .net terms)
-            if (!attr.HasValue())
+            if (!src.HasValue())
                 return null;
 
-            var val = attr.Values.First();
+            var val = src.Values.First();
 
             if (!string.IsNullOrWhiteSpace(val.S))
                 return val.S;
@@ -33,13 +49,13 @@ namespace DynamoDbSupplyCollector
             throw new NotSupportedException("CollectSample doesn't support complex values such as arrays, nested objects etc.");
         }
 
-        public static bool IsSimpleValue(this Dictionary<string, AttributeValue> attr)
+        public static bool IsSimpleValue(this Dictionary<string, AttributeValue> src)
         {
             // this is no any values when the actual value is undefined (null in .net terms)
-            if (!attr.HasValue())
+            if (!src.HasValue())
                 return true;
 
-            var val = attr.Values.First();
+            var val = src.Values.First();
 
             if (!string.IsNullOrWhiteSpace(val.S) ||
                 !string.IsNullOrWhiteSpace(val.N) ||

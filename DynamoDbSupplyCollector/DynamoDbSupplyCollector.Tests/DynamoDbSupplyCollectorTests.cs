@@ -1,4 +1,6 @@
+using Amazon.DynamoDBv2.DocumentModel;
 using FluentAssertions;
+using Newtonsoft.Json;
 using S2.BlackSwan.SupplyCollector.Models;
 using System;
 using System.Collections.Generic;
@@ -132,6 +134,15 @@ namespace DynamoDbSupplyCollector.Tests
 
             // assert
             sample.Should().HaveCount(0);
+        }
+
+        [Fact]
+        public void GetSchema()
+        {
+            var schema = _sut.GetSchema(_container);
+            //Document.FromAttributeMap
+
+
         }
 
         private bool IsInt(string val)

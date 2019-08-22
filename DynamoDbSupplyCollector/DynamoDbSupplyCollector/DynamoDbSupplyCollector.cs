@@ -1,4 +1,6 @@
-﻿using Amazon.DynamoDBv2.Model;
+﻿using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+using Newtonsoft.Json;
 using S2.BlackSwan.SupplyCollector;
 using S2.BlackSwan.SupplyCollector.Models;
 using System;
@@ -9,6 +11,8 @@ namespace DynamoDbSupplyCollector
 {
     public class DynamoDbSupplyCollector : SupplyCollectorBase
     {
+        const int DEFAULT_SCHEMA_SAMPLE_SIZE = 10;
+
         public override List<string> CollectSample(DataEntity dataEntity, int sampleSize)
         {
             using (var client = new DynamoDBClientBuilder(dataEntity.Container.ConnectionString).GetClient())
@@ -69,7 +73,34 @@ namespace DynamoDbSupplyCollector
 
         public override (List<DataCollection>, List<DataEntity>) GetSchema(DataContainer container)
         {
-            throw new NotImplementedException();
+            using (var client = new DynamoDBClientBuilder(container.ConnectionString).GetClient())
+            {
+                var tableNames = client.GetTables().GetAwaiter().GetResult();
+
+                foreach (var tableName in tableNames.Where(t => t == "PEOPLE")) // remove where clause 
+                {
+                    GetSchema(tableName, client);
+                }
+
+                throw new NotImplementedException();
+            }
+
+        }
+
+        private void GetSchema(string tableName, AmazonDynamoDBClient client)
+        {
+            var request = new ScanRequest
+            {
+                TableName = tableName,
+                Limit = DEFAULT_SCHEMA_SAMPLE_SIZE
+            };
+
+            var samples = client.ScanAsync(request).GetAwaiter().GetResult();
+
+            var json = JsonConvert.SerializeObject(samples);
+
+            var dataEntities = samples.Items.SelectMany(s => s.GetSchema()).ToList();
+
         }
 
         public override bool TestConnection(DataContainer container)
