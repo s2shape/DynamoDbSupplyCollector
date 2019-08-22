@@ -45,6 +45,16 @@ namespace DynamoDbSupplyCollector.Tests
         }
 
         [Fact]
+        public void CollectSample_does_not_throw()
+        {
+            var (dataCollections, dataEntities) = _sut.GetSchema(_container);
+
+            var _ = dataEntities
+                .Where(d => d.Name == "Addresses.type1.Street1")
+                .Select(d => _sut.CollectSample(d, 50)).ToList();
+        }
+
+        [Fact]
         public void CollectSample_handles_strings_properly()
         {
             // arrange

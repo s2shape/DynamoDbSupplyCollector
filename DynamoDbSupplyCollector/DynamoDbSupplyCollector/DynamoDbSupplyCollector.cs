@@ -16,13 +16,8 @@ namespace DynamoDbSupplyCollector
         {
             using (var client = new DynamoDBClientBuilder(dataEntity.Container.ConnectionString).GetClient())
             {
-                // what if you need a specific attribute that not every document has?
-                // should we skip those docs?
-                // should we skip null values?
-                // what if one doc has Addresses as a simple value but another one as a complex object?
                 var request = new ScanRequest
                 {
-                    AttributesToGet = new List<string> { dataEntity.Name },
                     TableName = dataEntity.Collection.Name,
                     Limit = sampleSize
                 };
@@ -30,8 +25,7 @@ namespace DynamoDbSupplyCollector
                 var result = client.ScanAsync(request).GetAwaiter().GetResult();
 
                 var samples = result.Items
-                    .Where(x => x.IsSimpleValue())
-                    .Select(x => x.GetValue())
+                    .Select(x => x.CollectSample(dataEntity.Name))
                     .ToList();
 
                 return samples;
