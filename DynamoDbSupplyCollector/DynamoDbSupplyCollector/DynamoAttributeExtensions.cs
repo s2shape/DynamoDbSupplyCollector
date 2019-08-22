@@ -71,33 +71,41 @@ namespace DynamoDbSupplyCollector
             }
         }
 
-        public static string CollectSample(
+        public static List<string> CollectSample(
             this Dictionary<string, AttributeValue> src,
             string dataEntityName)
         {
-            if (src.ContainsKey(dataEntityName))
+            if (src.IsSimpleValue())
             {
                 var attr = src[dataEntityName];
                 var (_, _, value) = attr.GetValue();
 
-                return value;
+                return new List<string> { value };
             }
-            else if (IsNestedObject(dataEntityName))
+            else //if (IsNestedObject(dataEntityName))
             {
                 var dataEntityPath = dataEntityName.Split(".");
 
                 var rootPath = dataEntityPath.First();
 
-                var root = src[rootPath];
+                var root = src.Values.First();
 
+                // path issue
+                string subPath = string.Join('.', dataEntityPath.Skip(1));
                 if (root.IsMSet)
                 {
-                    var childPath = dataEntityPath.Skip(1);
-                    return CollectSample(root.M, string.Join('.', childPath));
+                    return CollectSample(root.M, subPath);
+                }
+                else if (root.IsLSet)
+                {
+                    var list = root.L;
+
+                    foreach (var item in list)
+                    {
+                        return CollectSample(new Dictionary<string, AttributeValue> { { "", item } }, subPath);
+                    }
                 }
             }
-
-
 
             throw new NotImplementedException();
         }
@@ -156,7 +164,7 @@ namespace DynamoDbSupplyCollector
 
             throw new NotSupportedException("Couldn't collect sample.");
         }
-        
+
         private static bool IsSimpleValue(this Dictionary<string, AttributeValue> src)
         {
             // this is no any values when the actual value is undefined (null in .net terms)

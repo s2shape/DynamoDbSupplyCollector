@@ -25,7 +25,7 @@ namespace DynamoDbSupplyCollector
                 var result = client.ScanAsync(request).GetAwaiter().GetResult();
 
                 var samples = result.Items
-                    .Select(x => x.CollectSample(dataEntity.Name))
+                    .SelectMany(x => x.CollectSample(dataEntity.Name))
                     .ToList();
 
                 return samples;

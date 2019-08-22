@@ -4,6 +4,7 @@ using Xunit;
 using S2.BlackSwan.SupplyCollector.Models;
 using FluentAssertions;
 using System.IO;
+using System.Linq;
 
 namespace DynamoDbSupplyCollector.Tests
 {
@@ -125,6 +126,18 @@ namespace DynamoDbSupplyCollector.Tests
         };
 
         [Fact]
+        public void CollectSample_nested_list_of_objects()
+        {
+            // act
+            var sample = _listSut.CollectSample("PhoneNumbers.CountryCode");
+
+            // assert
+            var expected = new List<string> { "CountryCode1", "CountryCode2" };
+
+            sample.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
         public void CollectSample_nested_object()
         {
             // act
@@ -133,7 +146,8 @@ namespace DynamoDbSupplyCollector.Tests
             // assert
             var expected = "Street10";
 
-            sample.Should().Be(expected);
+            sample.Should().HaveCount(1);
+            sample.First().Should().Be(expected);
         }
 
         [Fact]
