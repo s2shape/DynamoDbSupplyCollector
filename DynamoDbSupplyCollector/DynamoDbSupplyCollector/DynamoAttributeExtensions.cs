@@ -84,7 +84,17 @@ namespace DynamoDbSupplyCollector
             }
             else if (IsNestedObject(dataEntityName))
             {
+                var dataEntityPath = dataEntityName.Split(".");
 
+                var rootPath = dataEntityPath.First();
+
+                var root = src[rootPath];
+
+                if (root.IsMSet)
+                {
+                    var childPath = dataEntityPath.Skip(1);
+                    return CollectSample(root.M, string.Join('.', childPath));
+                }
             }
 
 
