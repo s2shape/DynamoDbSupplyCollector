@@ -144,6 +144,9 @@ namespace DynamoDbSupplyCollector.Tests
             return DateTime.TryParse(val, out var _);
         }
 
+        /// <summary>
+        /// Boolean value stores as a number. It cant either 1 or 0.
+        /// </summary>
         private bool IsBoolean(string val)
         {
             return val == "1" || val == "0";
