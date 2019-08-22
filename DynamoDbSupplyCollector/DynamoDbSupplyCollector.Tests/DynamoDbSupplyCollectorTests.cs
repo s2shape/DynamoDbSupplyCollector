@@ -1,6 +1,4 @@
-using Amazon.DynamoDBv2.DocumentModel;
 using FluentAssertions;
-using Newtonsoft.Json;
 using S2.BlackSwan.SupplyCollector.Models;
 using System;
 using System.Collections.Generic;
@@ -9,7 +7,6 @@ using Xunit;
 
 namespace DynamoDbSupplyCollector.Tests
 {
-    // Try to access a nested object.
     public class DynamoDbSupplyCollectorTests
     {
         private DynamoDbSupplyCollector _sut;
