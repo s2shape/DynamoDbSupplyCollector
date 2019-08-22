@@ -77,17 +77,14 @@ namespace DynamoDbSupplyCollector
             {
                 var tableNames = client.GetTables().GetAwaiter().GetResult();
 
-                foreach (var tableName in tableNames.Where(t => t == "PEOPLE")) // remove where clause 
-                {
-                    GetSchema(tableName, client);
-                }
+                var dataEntities = tableNames.SelectMany(t => GetSchema(t, client, container));
+                var dataCollections = tableNames.Select(t => new DataCollection(container, t));
 
-                throw new NotImplementedException();
+                return (dataCollections.ToList(), dataEntities.ToList());
             }
-
         }
 
-        private void GetSchema(string tableName, AmazonDynamoDBClient client)
+        private List<DataEntity> GetSchema(string tableName, AmazonDynamoDBClient client, DataContainer container)
         {
             var request = new ScanRequest
             {
@@ -97,10 +94,11 @@ namespace DynamoDbSupplyCollector
 
             var samples = client.ScanAsync(request).GetAwaiter().GetResult();
 
-            var json = JsonConvert.SerializeObject(samples);
+            var dataCollection = new DataCollection(container, tableName);
 
-            var dataEntities = samples.Items.SelectMany(s => s.GetSchema()).ToList();
+            var dataEntities = samples.Items.SelectMany(s => s.GetSchema(container, dataCollection)).ToList();
 
+            return dataEntities;
         }
 
         public override bool TestConnection(DataContainer container)
@@ -109,7 +107,7 @@ namespace DynamoDbSupplyCollector
             {
                 var request = new ListTablesRequest
                 {
-                    Limit = 100,
+                    Limit = 1,
                     ExclusiveStartTableName = null
                 };
 

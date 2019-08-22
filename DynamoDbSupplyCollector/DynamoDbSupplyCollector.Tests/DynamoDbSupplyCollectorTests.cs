@@ -139,10 +139,10 @@ namespace DynamoDbSupplyCollector.Tests
         [Fact]
         public void GetSchema()
         {
-            var schema = _sut.GetSchema(_container);
-            //Document.FromAttributeMap
+            var (dataCollections, dataEntities) = _sut.GetSchema(_container);
 
-
+            dataCollections.Should().NotBeEmpty();
+            dataEntities.Should().NotBeEmpty();
         }
 
         private bool IsInt(string val)
