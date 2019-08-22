@@ -7,6 +7,7 @@ using Xunit;
 
 namespace DynamoDbSupplyCollector.Tests
 {
+    // Try to access a nested object.
     public class DynamoDbSupplyCollectorTests
     {
         private DynamoDbSupplyCollector _sut;
@@ -15,7 +16,7 @@ namespace DynamoDbSupplyCollector.Tests
             ConnectionString = "ServiceURL=http://localhost:8000; AccessKey=key_id; AccessSecret=access_key"
         };
         readonly List<string> KNOWN_TABLES = new List<string> { "CONTACTS_AUDIT", "EMAILS", "LEADS", "PEOPLE" };
-
+        
         public DynamoDbSupplyCollectorTests()
         {
             _sut = new DynamoDbSupplyCollector();
