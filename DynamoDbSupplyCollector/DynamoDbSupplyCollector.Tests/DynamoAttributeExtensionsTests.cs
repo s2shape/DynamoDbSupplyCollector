@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using Xunit;
 using S2.BlackSwan.SupplyCollector.Models;
 using FluentAssertions;
+using System.IO;
 
 namespace DynamoDbSupplyCollector.Tests
 {
     public class DynamoAttributeExtensionsTests
     {
         [Fact]
-        public void GetSchema_handles_dynamo_maps()
+        public void GetSchema_handles_maps()
         {
             // arrange
             var container = new DataContainer();
@@ -78,7 +79,7 @@ namespace DynamoDbSupplyCollector.Tests
         }
 
         [Fact]
-        public void GetSchema_handles_dynamo_lists()
+        public void GetSchema_handles_lists_of_objects()
         {
             // arrange
             var container = new DataContainer();
@@ -151,7 +152,7 @@ namespace DynamoDbSupplyCollector.Tests
                         NS = new List<string>{ "1", "-2" },
                     }
                 },
-                {                    
+                {
                     "BooleanValue", new AttributeValue
                     {
                         IsBOOLSet = true,
@@ -167,6 +168,40 @@ namespace DynamoDbSupplyCollector.Tests
                 new DataEntity("SimpleStrings", DataType.Unknown, "SS", container, collection),
                 new DataEntity("SimpleInts", DataType.Unknown, "NS", container, collection),
                 new DataEntity("BooleanValue", DataType.Boolean, "BOOL", container, collection)
+            };
+
+            schema.Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void GetSchema_handles_binary_data()
+        {
+            // arrange
+            var container = new DataContainer();
+            var collection = new DataCollection(container, "Any");
+
+            var sut = new Dictionary<string, AttributeValue>
+            {
+                {
+                    "BinaryDataObjects", new AttributeValue
+                    {
+                        BS = new List<MemoryStream> { new MemoryStream() },
+                    }
+                },
+                {
+                    "BinaryDataObject", new AttributeValue
+                    {
+                        B = new MemoryStream(),
+                    }
+                }
+            };
+
+            var schema = sut.GetSchema(container, collection);
+
+            var expected = new List<DataEntity>()
+            {
+                new DataEntity("BinaryDataObjects", DataType.Unknown, "BS", container, collection),
+                new DataEntity("BinaryDataObject", DataType.ByteArray, "B", container, collection)
             };
 
             schema.Should().BeEquivalentTo(expected);

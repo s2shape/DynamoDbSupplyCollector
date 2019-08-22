@@ -27,8 +27,8 @@ namespace DynamoDbSupplyCollector
                         var key = current.Keys.First();
                         var newEntityName = GetEntityName(dataEntityName, key);
 
-                        var (v, t) = GetMeta(current);
-                        dataEntities.Add(new DataEntity(newEntityName, t, v, dataContainer, dataCollection));
+                        var (t1, t2) = GetMeta(current);
+                        dataEntities.Add(new DataEntity(newEntityName, t2, t1, dataContainer, dataCollection));
                     }
                     else if (current.Values.Count == 1)
                     {
@@ -107,6 +107,12 @@ namespace DynamoDbSupplyCollector
             if (val.SS?.Any() ?? false)
                 return ("SS", DataType.Unknown);
 
+            if (val.BS?.Any() ?? false)
+                return ("BS", DataType.Unknown);
+
+            if (val.B != null)
+                return ("B", DataType.ByteArray);
+
             if (val.NULL)
                 return ("NULL", DataType.Unknown);
 
@@ -150,6 +156,8 @@ namespace DynamoDbSupplyCollector
                 val.NS.Any() ||
                 val.SS.Any() ||
                 val.IsBOOLSet ||
+                val.BS.Any() ||
+                val.B != null ||
                 val.NULL)
                 return true;
 
