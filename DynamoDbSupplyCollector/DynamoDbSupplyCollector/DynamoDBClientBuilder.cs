@@ -1,5 +1,6 @@
 ﻿using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using System;
 
 namespace DynamoDbSupplyCollector
 {
@@ -14,8 +15,14 @@ namespace DynamoDbSupplyCollector
 
         public AmazonDynamoDBClient GetClient()
         {
-            //TODO: re-factor handling of the connection string
             var sections = _connectionString.Split(';');
+
+            if (sections.Length < 3)
+            {
+                throw new FormatException("Invalid connection string format for DynamoDB. " +
+                    "The valid format is " +
+                    "'ServiceURL={YOUR_SERVICE_URL}; AccessKey={YOUR_KEY}; AccessSecret={YOUR_SECRET}");
+            }
 
             var serviceUrlSection = sections[0];
 

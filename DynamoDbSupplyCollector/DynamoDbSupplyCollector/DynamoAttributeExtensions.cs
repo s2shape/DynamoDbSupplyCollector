@@ -68,7 +68,7 @@ namespace DynamoDbSupplyCollector
             string dataEntityName,
             List<string> initialSamples = null)
         {
-            if(initialSamples == null)
+            if (initialSamples == null)
                 initialSamples = new List<string>();
 
             if (src.IsSimpleValue())
@@ -81,7 +81,7 @@ namespace DynamoDbSupplyCollector
             else
             {
                 // is key-value pairs of leaf level
-                if(!IsNestedObject(dataEntityName) && src.Values.Count > 1)
+                if (!IsNestedObject(dataEntityName) && src.Values.Count > 1)
                 {
                     var (_, _, value) = src[dataEntityName].GetValue();
                     initialSamples.AddRange(value);

@@ -115,35 +115,6 @@ namespace DynamoDbSupplyCollector.Tests
         }
 
         [Fact]
-        public void CollectSample_handles_nulls_properly()
-        {
-            // arrange
-            var dataCollection = new DataCollection(_container, "PEOPLE");
-            var dataEntity = new DataEntity("AlwaysNull", DataType.Unknown, "NULL", _container, dataCollection);
-            const int SampleSize = 202;
-
-            var sample = _sut.CollectSample(dataEntity, SampleSize);
-
-            // assert
-            sample.Should().HaveCount(SampleSize);
-            sample.Should().OnlyContain(s => string.IsNullOrEmpty(s));
-        }
-
-        [Fact]
-        public void CollectSample_skips_complex_objects()
-        {
-            // arrange
-            var dataCollection = new DataCollection(_container, "PEOPLE");
-            var dataEntity = new DataEntity("PhoneNumbers", DataType.Unknown, "List", _container, dataCollection);
-            const int SampleSize = 202;
-
-            var sample = _sut.CollectSample(dataEntity, SampleSize);
-
-            // assert
-            sample.Should().HaveCount(0);
-        }
-
-        [Fact]
         public void GetSchema()
         {
             var (dataCollections, dataEntities) = _sut.GetSchema(_container);

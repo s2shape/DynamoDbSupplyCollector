@@ -16,8 +16,6 @@ namespace DynamoDbDataLoader.Models
         public int Age { get; set; }
         public DateTime DOB { get; set; }
 
-        public string AlwaysNull { get; set; } = null;
-
         public Dictionary<string, Address> Addresses { get; set; }
         public List<Phone> PhoneNumbers { get; set; }
 
