@@ -18,8 +18,6 @@ namespace DynamoDbDataLoader
                 var context = new DynamoDBContext(client, contextConfig);
 
                 var dataProvider = new SampleDataProvider();
-
-
                 var people = dataProvider.GetPeople(200);
 
                 // bulk insert
