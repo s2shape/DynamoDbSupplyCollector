@@ -47,11 +47,14 @@ namespace DynamoDbSupplyCollector.Tests
         [Fact]
         public void CollectSample_does_not_throw()
         {
+            // get the schema and make sure that CollectSample doesn't throw any exception for every data entity
             var (dataCollections, dataEntities) = _sut.GetSchema(_container);
 
-            var _ = dataEntities
+            Action act = () => dataEntities
                 .Where(d => d.Name == "Addresses.type1.Street1")
                 .Select(d => _sut.CollectSample(d, 50)).ToList();
+
+            act.Should().NotThrow();
         }
 
         [Fact]
