@@ -10,6 +10,9 @@ Two docker containers are supposed to start. The first one is the actual DynamoD
 and the second one creates the test tables if they don't exist and stops.
 The GUI for the database can be accessed using this link http://localhost:8000/.
 
+Before you run the tests please go to `\DynamoDbSupplyCollector\DynamoDbDataLoader` and execute 
+`dotnet run` command to seed the database with test data.
+
 The command to run the tests is `dotnet test` but before you should go to this folder `\DynamoDbSupplyCollector\DynamoDbSupplyCollector.Tests`. 
 
 To stop the server and clean up the data please execute this command:
