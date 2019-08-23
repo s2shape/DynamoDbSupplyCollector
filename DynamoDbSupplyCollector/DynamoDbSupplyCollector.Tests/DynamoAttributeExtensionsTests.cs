@@ -5,11 +5,15 @@ using S2.BlackSwan.SupplyCollector.Models;
 using FluentAssertions;
 using System.IO;
 using System.Linq;
+using System;
+using System.Text;
 
 namespace DynamoDbSupplyCollector.Tests
 {
     public class DynamoAttributeExtensionsTests
     {
+        private static string Base64String = Convert.ToBase64String(Encoding.ASCII.GetBytes("any string"));
+
         private Dictionary<string, AttributeValue> _mapSut = new Dictionary<string, AttributeValue>
         {
             {
@@ -114,17 +118,36 @@ namespace DynamoDbSupplyCollector.Tests
             {
                 "BinaryDataObjects", new AttributeValue
                 {
-                    BS = new List<MemoryStream> { new MemoryStream() },
+                    BS = new List<MemoryStream>
+                    {
+                        new MemoryStream(Convert.FromBase64String(Base64String)),
+                        new MemoryStream(Convert.FromBase64String(Base64String))
+                    },
                 }
             },
             {
                 "BinaryDataObject", new AttributeValue
                 {
-                    B = new MemoryStream(),
+                    B = new MemoryStream(Convert.FromBase64String(Base64String)),
                 }
             }
         };
 
+
+        [Fact]
+        public void CollectSample_binary_data()
+        {
+            // act
+            var binaryObj = _binarySut.CollectSample("BinaryDataObject");
+            var binaryObjs = _binarySut.CollectSample("BinaryDataObjects");
+
+            // assert
+            var binaryObjExpected = new List<string> { Base64String };
+            binaryObj.Should().BeEquivalentTo(binaryObjExpected);
+
+            var bibaryObjsExpected = new List<string> { Base64String, Base64String };
+            binaryObjs.Should().BeEquivalentTo(bibaryObjsExpected);
+        }
 
         [Fact]
         public void CollectSample_simple_lists()

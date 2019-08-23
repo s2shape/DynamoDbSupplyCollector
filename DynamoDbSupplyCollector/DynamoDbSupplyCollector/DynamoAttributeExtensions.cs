@@ -2,6 +2,7 @@
 using S2.BlackSwan.SupplyCollector.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace DynamoDbSupplyCollector
@@ -151,15 +152,21 @@ namespace DynamoDbSupplyCollector
                 return ("SS", DataType.Unknown, src.SS);
 
             if (src.BS?.Any() ?? false)
-                return ("BS", DataType.Unknown, null);
+                return ("BS", DataType.Unknown, src.BS.Select(FromBinary).ToList());
 
             if (src.B != null)
-                return ("B", DataType.ByteArray, null);
+                return ("B", DataType.ByteArray, List(FromBinary(src.B)));
 
             if (src.NULL)
                 return ("NULL", DataType.Unknown, null);
 
             throw new NotSupportedException("Couldn't collect sample.");
+        }
+
+        private static string FromBinary(MemoryStream src)
+        {
+            // Due to the documentation binary data is Base64-encoded. https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
+            return Convert.ToBase64String(src.ToArray());
         }
 
         private static bool IsSimpleValue(this Dictionary<string, AttributeValue> src)
