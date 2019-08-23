@@ -75,7 +75,7 @@ namespace DynamoDbSupplyCollector
                 var attr = src[dataEntityName];
                 var (_, _, value) = attr.GetValue();
 
-                initialSamples.Add(value);
+                initialSamples.AddRange(value);
             }
             else
             {
@@ -83,7 +83,7 @@ namespace DynamoDbSupplyCollector
                 if(!IsNestedObject(dataEntityName) && src.Values.Count > 1)
                 {
                     var (_, _, value) = src[dataEntityName].GetValue();
-                    initialSamples.Add(value);
+                    initialSamples.AddRange(value);
                 }
                 else
                 {
@@ -122,7 +122,7 @@ namespace DynamoDbSupplyCollector
             return src.Values.Any();
         }
 
-        private static (string, DataType, string) GetValue(this Dictionary<string, AttributeValue> src)
+        private static (string, DataType, List<string>) GetValue(this Dictionary<string, AttributeValue> src)
         {
             // DynamoDB attribute types https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_streams_AttributeValue.html
             if (!src.HasValue())
@@ -133,22 +133,22 @@ namespace DynamoDbSupplyCollector
             return val.GetValue();
         }
 
-        private static (string, DataType, string) GetValue(this AttributeValue src)
+        private static (string, DataType, List<string>) GetValue(this AttributeValue src)
         {
             if (!string.IsNullOrWhiteSpace(src.S))
-                return ("S", DataType.String, src.S);
+                return ("S", DataType.String, List(src.S));
 
             if (!string.IsNullOrWhiteSpace(src.N))
-                return ("N", DataType.Decimal, src.N);
+                return ("N", DataType.Decimal, List(src.N));
 
             if (src.IsBOOLSet)
-                return ("BOOL", DataType.Boolean, src.BOOL ? "1" : "0");
+                return ("BOOL", DataType.Boolean, List(src.BOOL ? "1" : "0"));
 
             if (src.NS?.Any() ?? false)
-                return ("NS", DataType.Unknown, null);
+                return ("NS", DataType.Unknown, src.NS);
 
             if (src.SS?.Any() ?? false)
-                return ("SS", DataType.Unknown, null);
+                return ("SS", DataType.Unknown, src.SS);
 
             if (src.BS?.Any() ?? false)
                 return ("BS", DataType.Unknown, null);
@@ -188,6 +188,9 @@ namespace DynamoDbSupplyCollector
 
         private static Dictionary<string, AttributeValue> ToDictionary(AttributeValue val, string key = "") =>
             new Dictionary<string, AttributeValue> { { key, val } };
+
+        private static List<T> List<T>(T item) =>
+            new List<T> { item };
     }
 
     public static class LinqExtensions

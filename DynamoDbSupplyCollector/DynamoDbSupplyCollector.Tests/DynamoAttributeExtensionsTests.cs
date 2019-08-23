@@ -125,6 +125,25 @@ namespace DynamoDbSupplyCollector.Tests
             }
         };
 
+
+        [Fact]
+        public void CollectSample_simple_lists()
+        {
+            // act
+            var strings = _simpleListsSut.CollectSample("SimpleStrings");
+            var ints = _simpleListsSut.CollectSample("SimpleInts");
+            var bools = _simpleListsSut.CollectSample("BooleanValue");
+
+            // assert
+            var expectedStrings = new List<string> { "val1", "val2" };
+            var expectedInts = new List<string> { "1", "-2" };
+            var expectedBools = new List<string> { "1" };
+
+            strings.Should().BeEquivalentTo(expectedStrings);
+            ints.Should().BeEquivalentTo(expectedInts);
+            bools.Should().BeEquivalentTo(expectedBools);
+        }
+
         [Fact]
         public void CollectSample_nested_list_of_objects()
         {
