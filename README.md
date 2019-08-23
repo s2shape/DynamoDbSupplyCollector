@@ -6,6 +6,8 @@ To run DynamoDB in docker please go to the root directory where docker-complose.
 `docker-compose up`
 
 The command runs a DynamoDB instance and creates some test tables.
+Two docker containers are supposed to start. The first one is the actual DynamoDB server 
+and the second one creates the test tables if they don't exist and stops.
 The GUI for the database can be accessed using this link http://localhost:8000/.
 
 The command to run the tests is `dotnet test` but before you should go to this folder `\DynamoDbSupplyCollector\DynamoDbSupplyCollector.Tests`. 
