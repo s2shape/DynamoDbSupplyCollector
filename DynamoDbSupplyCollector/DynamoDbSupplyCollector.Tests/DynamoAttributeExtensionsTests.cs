@@ -132,7 +132,7 @@ namespace DynamoDbSupplyCollector.Tests
             var sample = _listSut.CollectSample("PhoneNumbers.CountryCode");
 
             // assert
-            var expected = new List<string> { "CountryCode1", "CountryCode2" };
+            var expected = new List<string> { "CountryCode1", "CountryCode0" };
 
             sample.Should().BeEquivalentTo(expected);
         }
@@ -144,7 +144,7 @@ namespace DynamoDbSupplyCollector.Tests
             var sample = _mapSut.CollectSample("Addresses.type0.Street1");
 
             // assert
-            var expected = "Street10";
+            var expected = "Street11";
 
             sample.Should().HaveCount(1);
             sample.First().Should().Be(expected);

@@ -44,13 +44,7 @@ namespace DynamoDbSupplyCollector
                         {
                             var list = value.L;
 
-                            foreach (var item in list)
-                            {
-                                Traverse(new Dictionary<string, AttributeValue>
-                                {
-                                    { "", item }
-                                }, newEntityName);
-                            }
+                            list.ForEach(x => Traverse(ToDictionary(x), newEntityName));
                         }
                     }
                     else
@@ -61,10 +55,7 @@ namespace DynamoDbSupplyCollector
                             var value = current.Values.ElementAt(i);
                             var newEntityName = GetEntityName(dataEntityName, key);
 
-                            Traverse(new Dictionary<string, AttributeValue>
-                            {
-                                { "", value }
-                            }, newEntityName);
+                            Traverse(ToDictionary(value), newEntityName);
                         }
                     }
                 }
@@ -73,41 +64,47 @@ namespace DynamoDbSupplyCollector
 
         public static List<string> CollectSample(
             this Dictionary<string, AttributeValue> src,
-            string dataEntityName)
+            string dataEntityName,
+            List<string> initialSamples = null)
         {
+            if(initialSamples == null)
+                initialSamples = new List<string>();
+
             if (src.IsSimpleValue())
             {
                 var attr = src[dataEntityName];
                 var (_, _, value) = attr.GetValue();
 
-                return new List<string> { value };
+                initialSamples.Add(value);
             }
-            else //if (IsNestedObject(dataEntityName))
+            else
             {
-                var dataEntityPath = dataEntityName.Split(".");
-
-                var rootPath = dataEntityPath.First();
-
-                var root = src.Values.First();
-
-                // path issue
-                string subPath = string.Join('.', dataEntityPath.Skip(1));
-                if (root.IsMSet)
+                // is key-value pairs of leaf level
+                if(!IsNestedObject(dataEntityName) && src.Values.Count > 1)
                 {
-                    return CollectSample(root.M, subPath);
+                    var (_, _, value) = src[dataEntityName].GetValue();
+                    initialSamples.Add(value);
                 }
-                else if (root.IsLSet)
+                else
                 {
-                    var list = root.L;
+                    var root = src.Values.First();
 
-                    foreach (var item in list)
+                    if (root.IsMSet)
                     {
-                        return CollectSample(new Dictionary<string, AttributeValue> { { "", item } }, subPath);
+                        var dataEntityPath = dataEntityName.Split(".");
+                        string subPath = string.Join('.', dataEntityPath.Skip(1));
+
+                        CollectSample(root.M, subPath, initialSamples);
+                    }
+                    else if (root.IsLSet)
+                    {
+                        var list = root.L;
+                        list.ForEach(x => CollectSample(ToDictionary(x), dataEntityName, initialSamples));
                     }
                 }
             }
 
-            throw new NotImplementedException();
+            return initialSamples;
         }
 
         private static bool IsNestedObject(string entityName) => entityName.Contains(".");
@@ -188,6 +185,9 @@ namespace DynamoDbSupplyCollector
 
             return false;
         }
+
+        private static Dictionary<string, AttributeValue> ToDictionary(AttributeValue val, string key = "") =>
+            new Dictionary<string, AttributeValue> { { key, val } };
     }
 
     public static class LinqExtensions
