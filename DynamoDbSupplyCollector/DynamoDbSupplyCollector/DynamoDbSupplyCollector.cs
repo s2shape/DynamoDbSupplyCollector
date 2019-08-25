@@ -16,15 +16,27 @@ namespace DynamoDbSupplyCollector
         {
             using (var client = new DynamoDBClientBuilder(dataEntity.Container.ConnectionString).GetClient())
             {
-                var request = new ScanRequest
+                var itemsCount = GetItemsCount(dataEntity.Collection.Name, client);
+
+                if (itemsCount == 0)
+                    return Enumerable.Empty<string>().ToList();
+
+                var randomSampler = new RandomSampler(sampleSize, itemsCount, 10);
+
+                var datasource = randomSampler.Random(limit =>
                 {
-                    TableName = dataEntity.Collection.Name,
-                    Limit = sampleSize
-                };
+                    var request = new ScanRequest
+                    {
+                        TableName = dataEntity.Collection.Name,
+                        Limit = (int)limit
+                    };
 
-                var result = client.ScanAsync(request).GetAwaiter().GetResult();
+                    var response = client.ScanAsync(request).GetAwaiter().GetResult();
 
-                var samples = result.Items
+                    return response.Items;
+                });
+
+                var samples = datasource
                     .SelectMany(x => x.CollectSample(dataEntity.Name))
                     .ToList();
 
@@ -77,6 +89,15 @@ namespace DynamoDbSupplyCollector
             }
         }
 
+        private long GetItemsCount(string tableName, AmazonDynamoDBClient client)
+        {
+            var request = new DescribeTableRequest(tableName);
+
+            var response = client.DescribeTableAsync(request).GetAwaiter().GetResult();
+
+            return response.Table.ItemCount;
+        }
+
         private List<DataEntity> GetSchema(string tableName, AmazonDynamoDBClient client, DataContainer container)
         {
             var request = new ScanRequest
@@ -89,7 +110,10 @@ namespace DynamoDbSupplyCollector
 
             var dataCollection = new DataCollection(container, tableName);
 
-            var dataEntities = samples.Items.SelectMany(s => s.GetSchema(container, dataCollection)).ToList();
+            var dataEntities = samples.Items
+                .SelectMany(s => s.GetSchema(container, dataCollection))
+                .DistinctBy(s => s.Name)
+                .ToList();
 
             return dataEntities;
         }
