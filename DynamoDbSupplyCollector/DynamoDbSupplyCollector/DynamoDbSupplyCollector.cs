@@ -18,6 +18,9 @@ namespace DynamoDbSupplyCollector
             {
                 var itemsCount = GetItemsCount(dataEntity.Collection.Name, client);
 
+                if (itemsCount == 0)
+                    return Enumerable.Empty<string>().ToList();
+
                 var randomSampler = new RandomSampler(sampleSize, itemsCount, 10);
 
                 var datasource = randomSampler.Random(limit =>
@@ -32,7 +35,7 @@ namespace DynamoDbSupplyCollector
 
                     return response.Items;
                 });
-                
+
                 var samples = datasource
                     .SelectMany(x => x.CollectSample(dataEntity.Name))
                     .ToList();
@@ -107,7 +110,10 @@ namespace DynamoDbSupplyCollector
 
             var dataCollection = new DataCollection(container, tableName);
 
-            var dataEntities = samples.Items.SelectMany(s => s.GetSchema(container, dataCollection)).ToList();
+            var dataEntities = samples.Items
+                .SelectMany(s => s.GetSchema(container, dataCollection))
+                .DistinctBy(s => s.Name)
+                .ToList();
 
             return dataEntities;
         }

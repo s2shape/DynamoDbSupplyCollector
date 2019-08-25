@@ -52,7 +52,7 @@ namespace DynamoDbSupplyCollector.Tests
 
             Action act = () => dataEntities
                 .Where(d => d.Name == "Addresses.type1.Street1")
-                .Select(d => _sut.CollectSample(d, 50)).ToList();
+                .Select(d => _sut.CollectSample(d, dataEntities.Count)).ToList();
 
             act.Should().NotThrow();
         }
