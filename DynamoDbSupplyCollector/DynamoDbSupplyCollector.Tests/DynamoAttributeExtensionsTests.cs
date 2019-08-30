@@ -23,21 +23,6 @@ namespace DynamoDbSupplyCollector.Tests
                     M = new Dictionary<string, AttributeValue>
                     {
                         {
-                            "type1", new AttributeValue
-                            {
-                                IsMSet = true,
-                                M = new Dictionary<string, AttributeValue>
-                                {
-                                    { "Zip", new AttributeValue { S = "Zip1" } },
-                                    { "Street2", new AttributeValue { S = "Street21" } },
-                                    { "Street1", new AttributeValue { S = "Street11" } },
-                                    { "City", new AttributeValue { S = "City1" } },
-                                    { "State", new AttributeValue { S = "State1" } },
-                                }
-                            }
-                        },
-
-                            {
                             "type0", new AttributeValue
                             {
                                 IsMSet = true,
@@ -51,7 +36,7 @@ namespace DynamoDbSupplyCollector.Tests
                                 }
                             }
                         }
-                    },
+                    }
                 }
             }
         };
@@ -186,10 +171,20 @@ namespace DynamoDbSupplyCollector.Tests
             var sample = _mapSut.CollectSample("Addresses.type0.Street1");
 
             // assert
-            var expected = "Street11";
+            var expected = "Street10";
 
             sample.Should().HaveCount(1);
             sample.First().Should().Be(expected);
+        }
+
+        [Fact]
+        public void CollectSample_nested_object_that_does_not_exist()
+        {
+            // act
+            var sample = _mapSut.CollectSample("Addresses.type1.Street1");
+
+            // assert
+            sample.Should().HaveCount(0);
         }
 
         [Fact]
@@ -205,12 +200,6 @@ namespace DynamoDbSupplyCollector.Tests
             // assert
             var expected = new List<DataEntity>()
             {
-                new DataEntity("Addresses.type1.Zip", DataType.String, "S", container, collection),
-                new DataEntity("Addresses.type1.Street2", DataType.String, "S", container, collection),
-                new DataEntity("Addresses.type1.Street1", DataType.String, "S", container, collection),
-                new DataEntity("Addresses.type1.City", DataType.String, "S", container, collection),
-                new DataEntity("Addresses.type1.State", DataType.String, "S", container, collection),
-
                 new DataEntity("Addresses.type0.Zip", DataType.String, "S", container, collection),
                 new DataEntity("Addresses.type0.Street2", DataType.String, "S", container, collection),
                 new DataEntity("Addresses.type0.Street1", DataType.String, "S", container, collection),
@@ -248,7 +237,7 @@ namespace DynamoDbSupplyCollector.Tests
             // arrange
             var container = new DataContainer();
             var collection = new DataCollection(container, "Any");
-           
+
             // act
             var schema = _simpleListsSut.GetSchema(container, collection);
 

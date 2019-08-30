@@ -71,7 +71,7 @@ namespace DynamoDbSupplyCollector
             if (initialSamples == null)
                 initialSamples = new List<string>();
 
-            if (src.IsSimpleValue())
+            if (src.IsSimpleValue() && src.ContainsKey(dataEntityName))
             {
                 var attr = src[dataEntityName];
                 var (_, _, value) = attr.GetValue();
@@ -81,31 +81,40 @@ namespace DynamoDbSupplyCollector
             else
             {
                 // is key-value pairs of leaf level
-                if (!IsNestedObject(dataEntityName) && src.Values.Count > 1)
+                if (!IsNestedObject(dataEntityName) && src.Values.Count > 1 && src.ContainsKey(dataEntityName))
                 {
                     var (_, _, value) = src[dataEntityName].GetValue();
                     initialSamples.AddRange(value);
                 }
                 else
                 {
-                    var root = src.Values.First();
+                    var dataEntityPath = dataEntityName.Split(".");
+                    string subPath = string.Join('.', dataEntityPath.Skip(1));
 
-                    if (root.IsMSet)
+                    if (src.ContainsKey(dataEntityPath.First()) || IsListItem(src))
                     {
-                        var dataEntityPath = dataEntityName.Split(".");
-                        string subPath = string.Join('.', dataEntityPath.Skip(1));
+                        var root = src.ContainsKey(dataEntityPath.First()) ?
+                            src[dataEntityPath.First()] : src[""];
 
-                        CollectSample(root.M, subPath, initialSamples);
-                    }
-                    else if (root.IsLSet)
-                    {
-                        var list = root.L;
-                        list.ForEach(x => CollectSample(ToDictionary(x), dataEntityName, initialSamples));
+                        if (root.IsMSet)
+                        {
+                            CollectSample(root.M, subPath, initialSamples);
+                        }
+                        else if (root.IsLSet)
+                        {
+                            var list = root.L;
+                            list.ForEach(x => CollectSample(ToDictionary(x), dataEntityName, initialSamples));
+                        }
                     }
                 }
             }
 
             return initialSamples;
+        }
+
+        private static bool IsListItem(Dictionary<string, AttributeValue> src)
+        {
+            return src.Keys.Count == 1 && src.Keys.First() == "";
         }
 
         private static bool IsNestedObject(string entityName) => entityName.Contains(".");

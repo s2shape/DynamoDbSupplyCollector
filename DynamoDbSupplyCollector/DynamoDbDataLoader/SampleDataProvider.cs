@@ -12,7 +12,10 @@ namespace DynamoDbDataLoader
 
             var noLastName = new Person() { Id = Guid.NewGuid(), FirstName = "Eugene" };
             var deleted = new Person() { Id = Guid.NewGuid(), FirstName = "Eugene (deleted)", IsDeleted = true };
+            var noType1 = new Person(1000000, 10, 10);
+            noType1.Addresses["type1"] = null;
 
+            list.Add(noType1);
             list.Add(noLastName);
             list.Add(deleted);
 
