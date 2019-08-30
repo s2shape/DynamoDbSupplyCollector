@@ -30,5 +30,26 @@ namespace DynamoDbSupplyCollector
 
             return tableNames;
         }
+
+        public static async Task<List<Dictionary<string, AttributeValue>>> ScanAll(this AmazonDynamoDBClient client, ScanRequest request)
+        {
+            var result = new List<Dictionary<string, AttributeValue>>();
+            Dictionary<string, AttributeValue> lastEvaluatedKey = null; 
+
+            // DynamoDB can return up to 1Mb at a time so here is extra logic to return large dataset
+            do
+            {
+                if (lastEvaluatedKey != null)
+                    request.ExclusiveStartKey = lastEvaluatedKey; // pagination - skips the data it has got already
+
+                var response = await client.ScanAsync(request);
+
+                result.AddRange(response.Items);
+
+                lastEvaluatedKey = response.LastEvaluatedKey;
+            } while (lastEvaluatedKey.Count > 0);
+
+            return result;
+        }
     }
 }
