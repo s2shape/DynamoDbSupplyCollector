@@ -31,9 +31,9 @@ namespace DynamoDbSupplyCollector
                         Limit = (int)limit
                     };
 
-                    var response = client.ScanAsync(request).GetAwaiter().GetResult();
+                    var response = client.ScanAll(request).GetAwaiter().GetResult();
 
-                    return response.Items;
+                    return response;
                 });
 
                 var samples = datasource
