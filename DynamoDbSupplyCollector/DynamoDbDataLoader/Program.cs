@@ -9,10 +9,22 @@ namespace DynamoDbDataLoader
     {
         static void Main(string[] args)
         {
-            try
-            {
-                var clientConfig = new AmazonDynamoDBConfig() { ServiceURL = "http://localhost:8000" };
-                var client = new AmazonDynamoDBClient("key_id", "access_key", clientConfig);
+            try {
+                var host = Environment.GetEnvironmentVariable("DYNAMODB_HOST");
+                if (String.IsNullOrEmpty(host))
+                    host = "localhost";
+                var port = Environment.GetEnvironmentVariable("DYNAMODB_PORT");
+                if (String.IsNullOrEmpty(port))
+                    port = "8000";
+                var keyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+                if (String.IsNullOrEmpty(keyId))
+                    keyId = "key_id";
+                var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+                if (String.IsNullOrEmpty(secretKey))
+                    secretKey = "access_key";
+
+                var clientConfig = new AmazonDynamoDBConfig() { ServiceURL = $"http://{host}:{port}" };
+                var client = new AmazonDynamoDBClient(keyId, secretKey, clientConfig);
 
                 var contextConfig = new DynamoDBContextConfig() { TableNamePrefix = "" };
                 var context = new DynamoDBContext(client, contextConfig);

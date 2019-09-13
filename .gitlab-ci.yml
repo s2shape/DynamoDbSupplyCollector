@@ -1,0 +1,38 @@
+image: microsoft/dotnet:latest
+
+stages:
+  - build
+  - test
+
+variables:
+  DYNAMODB_HOST: dynamo
+  DYNAMODB_PORT: "8000"
+  AWS_ACCESS_KEY_ID: "key_id"
+  AWS_SECRET_ACCESS_KEY: "access_key"
+
+build:
+  stage: build
+  script:
+    - cd DynamoDbSupplyCollector
+    - dotnet restore
+    - dotnet build
+
+test:
+  stage: test
+
+  services:
+    - name: instructure/dynamo-local-admin
+      alias: dynamo
+
+  script:
+    - apt-get update && curl -sL https://deb.nodesource.com/setup_11.x  | bash - && apt-get -y install nodejs 
+    - cd DynamoInit
+    - npm install
+    - node index.js
+    - cd ../DynamoDbSupplyCollector
+    - dotnet restore
+    - dotnet build
+    - cd DynamoDbDataLoader
+    - dotnet run
+    - cd ..
+    - dotnet test

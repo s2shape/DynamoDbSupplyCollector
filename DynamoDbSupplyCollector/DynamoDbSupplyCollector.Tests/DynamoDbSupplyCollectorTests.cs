@@ -7,18 +7,28 @@ using Xunit;
 
 namespace DynamoDbSupplyCollector.Tests
 {
-    public class DynamoDbSupplyCollectorTests
+    public class DynamoDbSupplyCollectorTests : IClassFixture<LaunchSettingsFixture>
     {
+        private LaunchSettingsFixture _fixture;
         private DynamoDbSupplyCollector _sut;
-        private DataContainer _container = new DataContainer
-        {
-            ConnectionString = "ServiceURL=http://localhost:8000; AccessKey=key_id; AccessSecret=access_key"
-        };
+        private DataContainer _container;
+
         readonly List<string> KNOWN_TABLES = new List<string> { "CONTACTS_AUDIT", "EMAILS", "LEADS", "PEOPLE" };
         
-        public DynamoDbSupplyCollectorTests()
+        public DynamoDbSupplyCollectorTests(LaunchSettingsFixture fixture)
         {
+            _fixture = fixture;
             _sut = new DynamoDbSupplyCollector();
+
+            var host = Environment.GetEnvironmentVariable("DYNAMODB_HOST");
+            var port = Environment.GetEnvironmentVariable("DYNAMODB_PORT");
+            var keyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+            var secretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+
+            _container = new DataContainer
+            {
+                ConnectionString = $"ServiceURL=http://{host}:{port}; AccessKey={keyId}; AccessSecret={secretKey}"
+            };
         }
 
         [Fact]
