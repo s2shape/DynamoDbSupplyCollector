@@ -4,7 +4,7 @@ using System;
 
 namespace DynamoDbSupplyCollector
 {
-    internal class DynamoDBClientBuilder
+    public class DynamoDBClientBuilder
     {
         private string _connectionString;
 
@@ -31,9 +31,16 @@ namespace DynamoDbSupplyCollector
             var accessKeySection = sections[2];
 
             var clientConfig = new AmazonDynamoDBConfig() { ServiceURL = Value(serviceUrlSection) };
-            var client = new AmazonDynamoDBClient(Value(keyIdSection), Value(accessKeySection), clientConfig);
+            try {
+                Console.WriteLine("Creating client");
+                var client = new AmazonDynamoDBClient(Value(keyIdSection), Value(accessKeySection), clientConfig);
 
-            return client;
+                return client;
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"Error: {ex}");
+                throw ex;
+            }
         }
 
         public DynamoDBContext GetContext(string connectionString)
