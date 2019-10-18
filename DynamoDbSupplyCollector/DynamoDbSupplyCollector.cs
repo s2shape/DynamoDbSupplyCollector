@@ -130,7 +130,7 @@ namespace DynamoDbSupplyCollector
 
                 try
                 {
-                    client.ListTablesAsync(request).GetAwaiter().GetResult();
+                    client.ListTablesAsync(request).Wait();
                     return true;
                 }
                 catch (Exception)

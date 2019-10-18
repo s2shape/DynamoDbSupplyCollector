@@ -36,7 +36,7 @@ test:
     - dotnet SupplyCollectorDataLoader.dll -init DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY"
     - dotnet SupplyCollectorDataLoader.dll -xunit DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY"
     - cd $ROOT_PROJECT_PATH
-    - dotnet test
+    - dotnet test -v normal
 
 load_test:
   stage: test
@@ -52,6 +52,6 @@ load_test:
     - cp -f /SupplyCollectorDataLoader/SupplyCollectorDataLoader/bin/Debug/netcoreapp2.2/SupplyCollectorDataLoader.runtimeconfig.json .
     - dotnet SupplyCollectorDataLoader.dll -init DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY"
     - dotnet SupplyCollectorDataLoader.dll -xunit DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY"
-    - dotnet SupplyCollectorDataLoader.dll -samples DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY" TestCollection Test1:int,Test2:string,Test3:bool,Test4:double,Test5 1000000
+    - dotnet SupplyCollectorDataLoader.dll -samples DynamoDbSupplyCollector "ServiceURL=http://$DYNAMODB_HOST:$DYNAMODB_PORT;AccessKey=$AWS_ACCESS_KEY_ID;AccessSecret=$AWS_SECRET_ACCESS_KEY" TestCollection Test1:int,Test2:string,Test3:bool,Test4:double,Test5 100000
     - cd $ROOT_PROJECT_PATH/DynamoDbSupplyCollectorTests/bin/Debug/netcoreapp2.2/publish
     - SupplyCollectorTestHarness

@@ -20,7 +20,7 @@ namespace DynamoDbSupplyCollectorLoader
 
         public override void LoadSamples(DataEntity[] dataEntities, long count) {
             using (var client = new DynamoDBClientBuilder(dataEntities[0].Container.ConnectionString).GetClient()) {
-                var attrs = dataEntities.Select(x => new AttributeDefinition(x.Name, ScalarAttributeType.S)).ToList();
+                var attrs = new List<AttributeDefinition>();// dataEntities.Select(x => new AttributeDefinition(x.Name, ScalarAttributeType.S)).ToList();
                 attrs.Add(new AttributeDefinition("ID", ScalarAttributeType.S));
 
                 client.CreateTableAsync(dataEntities[0].Collection.Name,
@@ -34,10 +34,40 @@ namespace DynamoDbSupplyCollectorLoader
 
                 long rows = 0;
                 long batchSize = 100;
+                var r = new Random();
                 while (rows < count) {
+                    if (rows % 1000 == 0) {
+                        Console.Write(".");
+                    }
                     var batchWrite = table.CreateBatchWrite();
                     for (int i = 0; i < batchSize; i++) {
                         var doc = new Document();
+                        doc["ID"] = Guid.NewGuid().ToString();
+
+                        foreach (var dataEntity in dataEntities) {
+                            switch (dataEntity.DataType) {
+                                case DataType.String:
+                                    doc[dataEntity.Name] = new Guid().ToString();
+                                    break;
+                                case DataType.Int:
+                                    doc[dataEntity.Name] = r.Next().ToString();
+                                    break;
+                                case DataType.Double:
+                                    doc[dataEntity.Name] = r.NextDouble().ToString();
+                                    break;
+                                case DataType.Boolean:
+                                    doc[dataEntity.Name] = (r.Next(100) > 50).ToString();
+                                    break;
+                                case DataType.DateTime:
+                                    doc[dataEntity.Name] = DateTimeOffset
+                                        .FromUnixTimeMilliseconds(
+                                            DateTimeOffset.Now.ToUnixTimeMilliseconds() + r.Next()).DateTime.ToString("s");
+                                    break;
+                                default:
+                                    doc[dataEntity.Name] = r.Next().ToString();
+                                    break;
+                            }
+                        }
 
                         batchWrite.AddDocumentToPut(doc);
                     }
@@ -45,6 +75,7 @@ namespace DynamoDbSupplyCollectorLoader
                     batchWrite.ExecuteAsync().Wait();
                     rows += batchSize;
                 }
+                Console.WriteLine();
             }
         }
 

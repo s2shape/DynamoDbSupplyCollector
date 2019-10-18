@@ -40,12 +40,14 @@ namespace DynamoDbSupplyCollector.Tests
         [Fact]
         public void TestConnection()
         {
+            Console.WriteLine("TestConnection()");
             _sut.TestConnection(_container).Should().BeTrue();
         }
 
         [Fact]
         public void GetDataCollectionMetrics()
         {
+            Console.WriteLine("GetDataCollectionMetrics()");
             // act
             var metrics = _sut.GetDataCollectionMetrics(_container);
 
@@ -57,6 +59,7 @@ namespace DynamoDbSupplyCollector.Tests
         [Fact]
         public void CollectSample_does_not_throw()
         {
+            Console.WriteLine("CollectSample_does_not_throw()");
             // get the schema and make sure that CollectSample doesn't throw any exception for every data entity
             var (dataCollections, dataEntities) = _sut.GetSchema(_container);
 
