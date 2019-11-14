@@ -15,7 +15,7 @@ namespace DynamoDbSupplyCollector.Tests
             var sut = new RandomSampler(SampleSize, collectionOf100.Count);
 
             // act
-            var result = sut.Random(_ => collectionOf100);
+            var result = sut.Random(collectionOf100);
 
             result.Should().HaveCount(SampleSize);
             result.Should().OnlyHaveUniqueItems();
@@ -30,7 +30,7 @@ namespace DynamoDbSupplyCollector.Tests
             var sut = new RandomSampler(SampleSize, collectionOf10.Count);
 
             // act
-            var result = sut.Random(_ => collectionOf10);
+            var result = sut.Random(collectionOf10);
 
             // assert
             result.Should().BeEquivalentTo(collectionOf10);
@@ -46,7 +46,7 @@ namespace DynamoDbSupplyCollector.Tests
             var sut = new RandomSampler(SampleSize, collectionOf10_000.Count);
 
             // act
-            var result = sut.Random(n => collectionOf10_000.Take((int)n).ToList());
+            var result = sut.Random(collectionOf10_000.Take(1000).ToList());
 
             // assert
             var dataShouldUsedForSamples = collectionOf10_000.Take(20).ToList();

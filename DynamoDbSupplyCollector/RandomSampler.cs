@@ -20,9 +20,11 @@ namespace DynamoDbSupplyCollector
             _minPercentage = minPercentage == 0 ? DAFAULT_MIN_PERCENTAGE : minPercentage;
         }
 
-        public List<T> Random<T>(Func<long, List<T>> getData)
+        public List<T> Random<T>(List<T> data)
         {
-            var (data, percentage) = GetData(getData);
+            var percentage = (double)_sampleSize / _itemsCount * 100;
+            if (percentage < _minPercentage)
+                percentage = _minPercentage;
 
             if (data.Count <= _sampleSize)
                 return data;
@@ -50,25 +52,6 @@ namespace DynamoDbSupplyCollector
             }
 
             return sampleCollection;
-        }
-
-        private (List<T>, double) GetData<T>(Func<long, List<T>> getData)
-        {
-            var percentage = (double)_sampleSize / _itemsCount * 100;
-
-            if (percentage >= _minPercentage)
-            {
-                var data = getData(_itemsCount);
-
-                return (data, percentage);
-            }
-            else
-            {
-                var count = _sampleSize * _minPercentage;
-                var data = getData((int)count);
-
-                return (data, _minPercentage);
-            }
         }
     }
 }
