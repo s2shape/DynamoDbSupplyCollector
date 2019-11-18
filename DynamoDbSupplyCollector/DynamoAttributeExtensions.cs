@@ -74,9 +74,14 @@ namespace DynamoDbSupplyCollector
             if (src.IsSimpleValue() && src.ContainsKey(dataEntityName))
             {
                 var attr = src[dataEntityName];
-                var (_, _, value) = attr.GetValue();
+                try {
+                    var (_, _, value) = attr.GetValue();
 
-                initialSamples.AddRange(value);
+                    initialSamples.AddRange(value);
+                }
+                catch (Exception ex) {
+                    throw new ArgumentException($"Error getting value for {dataEntityName}", ex);
+                }
             }
             else
             {

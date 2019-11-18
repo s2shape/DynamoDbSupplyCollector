@@ -8,8 +8,8 @@ Run `dotnet build`
 Run `./run-tests.sh`
 
 ## Known issues
-- CAnnot load 100k samples even within 30 minutes
-
+- Cannot load 100k samples even within 30 minutes
+- Unstable tests.
 
 ## Additional info
 
